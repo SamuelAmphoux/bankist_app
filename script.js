@@ -61,6 +61,7 @@ const inputLoanAmount = document.querySelector('.form__input--loan-amount');
 const inputCloseUsername = document.querySelector('.form__input--user');
 const inputClosePin = document.querySelector('.form__input--pin');
 
+// This function will display every movement from the given account
 const displayMovements = function (movements) {
   containerMovements.innerHTML = '';
 
@@ -79,8 +80,25 @@ const displayMovements = function (movements) {
     containerMovements.insertAdjacentHTML('afterbegin', html);
   });
 };
-
 displayMovements(account1.movements);
+
+// Takes multiple strings and return one string made of all first letters
+const computeUsername = function (fullName) {
+  return fullName
+    .toLowerCase()
+    .split(' ')
+    .map(str => str.at(0))
+    .join('');
+};
+
+// Takes an array of strings and creates a property with initials to corresponding object
+const createUsernames = function (namesArr) {
+  namesArr.forEach(account => {
+    account.userName = computeUsername(account.owner);
+  });
+};
+createUsernames(accounts);
+console.log(accounts);
 
 /////////////////////////////////////////////////
 /////////////////////////////////////////////////
