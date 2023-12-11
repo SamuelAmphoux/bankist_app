@@ -63,9 +63,13 @@ const inputClosePin = document.querySelector('.form__input--pin');
 
 const displayMovements = function (movements) {
   movements.forEach((value, i, arr) => {
+    const type = value > 0 ? 'deposit' : 'withdrawal';
+
     const html = `
       <div class="movements__row">
-        <div class="movements__type movements__type--deposit">${arr.length} deposit</div>
+        <div class="movements__type movements__type--${type}">${type} ${
+      i + 1
+    }</div>
         <div class="movements__date">3 days ago</div>
         <div class="movements__value">${value}</div>
       </div>
