@@ -98,7 +98,14 @@ const createUsernames = function (namesArr) {
   });
 };
 createUsernames(accounts);
-console.log(accounts);
+
+// Add all deposits and withdrawals events to display balance
+const displayBalance = function (events) {
+  return events.reduce(function (acc, cur) {
+    return acc + cur;
+  }, 0);
+};
+labelBalance.innerHTML = displayBalance(account1.movements);
 
 /////////////////////////////////////////////////
 /////////////////////////////////////////////////
