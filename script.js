@@ -74,7 +74,7 @@ const displayMovements = function (movements) {
       i + 1
     } : ${type} </div>
         <div class="movements__date">3 days ago</div>
-        <div class="movements__value">${value}</div>
+        <div class="movements__value">${value}€</div>
       </div>
     `;
     containerMovements.insertAdjacentHTML('afterbegin', html);
@@ -106,6 +106,25 @@ const displayBalance = function (events) {
   }, 0);
 };
 labelBalance.innerHTML = displayBalance(account1.movements);
+
+const displayInterest = function (events) {
+  const incomes = events
+    .filter(event => event > 0)
+    .reduce((acc, curr) => acc + curr, 0);
+  labelSumIn.innerHTML = `${incomes}€`;
+
+  const expenses = events
+    .filter(event => event < 0)
+    .reduce((acc, curr) => acc + curr, 0);
+  labelSumOut.innerHTML = `${expenses}€`;
+
+  const interest = events
+    .filter(event => event > 0)
+    .map(deposit => (deposit * 1.2) / 100)
+    .reduce((acc, int) => (int >= 1 ? acc + int : acc), 0);
+  labelSumInterest.innerHTML = `${interest}€`;
+};
+displayInterest(account1.movements);
 
 /////////////////////////////////////////////////
 /////////////////////////////////////////////////
