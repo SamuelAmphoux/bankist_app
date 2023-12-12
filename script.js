@@ -62,7 +62,7 @@ const inputLoanAmount = document.querySelector('.form__input--loan-amount');
 const inputCloseUsername = document.querySelector('.form__input--user');
 const inputClosePin = document.querySelector('.form__input--pin');
 
-inputLoginUsername.value = inputLoginPin.value = '';
+document.querySelectorAll('input').forEach(el => (el.value = ''));
 
 // This function will display every movement from the given account
 const displayMovements = function (movements) {
@@ -106,6 +106,7 @@ const displayBalance = function (events) {
   const total = events.reduce(function (acc, cur) {
     return acc + cur;
   }, 0);
+  currentUser.balance = total;
   labelBalance.innerHTML = `${total}€`;
 };
 
@@ -145,6 +146,28 @@ btnLogin.addEventListener('click', function (e) {
     containerApp.style.opacity = 0;
     labelWelcome.textContent = 'Log in to get started';
     alert('Wrong Username/Password combination.');
+  }
+});
+
+// Allows logged in user to send money into another account
+btnTransfer.addEventListener('click', function (e) {
+  e.preventDefault();
+  const amount = Number(inputTransferAmount.value);
+  const receiverAcc = accounts.find(
+    acc => acc.userName === inputTransferTo.value
+  );
+  if (amount < 0 || receiverAcc === undefined)
+    return alert('Transaction impossible');
+  console.log(receiverAcc?.owner !== currentUser.owner);
+  if (
+    amount <= currentUser.balance &&
+    receiverAcc?.owner !== currentUser.owner
+  ) {
+    currentUser.movements.push(-amount);
+    receiverAcc.movements.push(amount);
+    bootDisplay(currentUser);
+    inputTransferAmount.value = inputTransferTo.value = '';
+    inputTransferAmount.blur();
   }
 });
 
