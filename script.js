@@ -34,6 +34,7 @@ const account4 = {
 };
 
 const accounts = [account1, account2, account3, account4];
+let currentUser;
 
 // Elements
 const labelWelcome = document.querySelector('.welcome');
@@ -61,6 +62,8 @@ const inputLoanAmount = document.querySelector('.form__input--loan-amount');
 const inputCloseUsername = document.querySelector('.form__input--user');
 const inputClosePin = document.querySelector('.form__input--pin');
 
+inputLoginUsername.value = inputLoginPin.value = '';
+
 // This function will display every movement from the given account
 const displayMovements = function (movements) {
   containerMovements.innerHTML = '';
@@ -80,7 +83,6 @@ const displayMovements = function (movements) {
     containerMovements.insertAdjacentHTML('afterbegin', html);
   });
 };
-displayMovements(account1.movements);
 
 // Takes multiple strings and return one string made of all first letters
 const computeUsername = function (fullName) {
@@ -101,13 +103,15 @@ createUsernames(accounts);
 
 // Add all deposits and withdrawals events to display balance
 const displayBalance = function (events) {
-  return events.reduce(function (acc, cur) {
+  const total = events.reduce(function (acc, cur) {
     return acc + cur;
   }, 0);
+  labelBalance.innerHTML = `${total}€`;
 };
-labelBalance.innerHTML = displayBalance(account1.movements);
 
-const displayInterest = function (events) {
+// Takes all movements and calc ins outs and interests displayed at the bottom
+const displayInterest = function (user) {
+  const events = user.movements;
   const incomes = events
     .filter(event => event > 0)
     .reduce((acc, curr) => acc + curr, 0);
@@ -120,12 +124,37 @@ const displayInterest = function (events) {
 
   const interest = events
     .filter(event => event > 0)
-    .map(deposit => (deposit * 1.2) / 100)
+    .map(deposit => (deposit * user.interestRate) / 100)
     .reduce((acc, int) => (int >= 1 ? acc + int : acc), 0);
   labelSumInterest.innerHTML = `${interest}€`;
 };
-displayInterest(account1.movements);
 
+// Login logic
+btnLogin.addEventListener('click', function (e) {
+  // Prevent form from submiting/redirecting
+  e.preventDefault();
+  currentUser = accounts.find(acc => acc.userName === inputLoginUsername.value);
+
+  if (currentUser?.pin === parseInt(inputLoginPin.value)) {
+    containerApp.style.opacity = 0;
+    inputLoginUsername.value = inputLoginPin.value = '';
+    inputLoginPin.blur();
+    const booting = () => bootDisplay(currentUser);
+    setTimeout(booting, labelBalance.innerHTML === '' ? 0 : 1000);
+  } else {
+    containerApp.style.opacity = 0;
+    labelWelcome.textContent = 'Log in to get started';
+    alert('Wrong Username/Password combination.');
+  }
+});
+
+const bootDisplay = function (user) {
+  labelWelcome.textContent = `Welcome back ${user.owner}`;
+  displayMovements(user.movements);
+  displayBalance(user.movements);
+  displayInterest(user);
+  containerApp.style.opacity = 1;
+};
 /////////////////////////////////////////////////
 /////////////////////////////////////////////////
 // LECTURES
