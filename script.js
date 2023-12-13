@@ -64,6 +64,19 @@ const inputClosePin = document.querySelector('.form__input--pin');
 
 document.querySelectorAll('input').forEach(el => (el.value = ''));
 
+const bootDisplay = function (user) {
+  labelWelcome.textContent = `Welcome back ${user.owner}`;
+  displayMovements(user.movements);
+  displayBalance(user.movements);
+  displayInterest(user);
+  containerApp.style.opacity = 1;
+};
+
+const disconnect = () => {
+  containerApp.style.opacity = 0;
+  labelWelcome.textContent = 'Log in to get started';
+};
+
 // This function will display every movement from the given account
 const displayMovements = function (movements) {
   containerMovements.innerHTML = '';
@@ -143,8 +156,7 @@ btnLogin.addEventListener('click', function (e) {
     const booting = () => bootDisplay(currentUser);
     setTimeout(booting, labelBalance.innerHTML === '' ? 0 : 1000);
   } else {
-    containerApp.style.opacity = 0;
-    labelWelcome.textContent = 'Log in to get started';
+    disconnect();
     alert('Wrong Username/Password combination.');
   }
 });
@@ -171,13 +183,22 @@ btnTransfer.addEventListener('click', function (e) {
   }
 });
 
-const bootDisplay = function (user) {
-  labelWelcome.textContent = `Welcome back ${user.owner}`;
-  displayMovements(user.movements);
-  displayBalance(user.movements);
-  displayInterest(user);
-  containerApp.style.opacity = 1;
-};
+// Allows to user to delete their account
+btnClose.addEventListener('click', function (e) {
+  e.preventDefault();
+  if (
+    inputCloseUsername.value === currentUser.userName &&
+    Number(inputClosePin.value) === currentUser.pin
+  ) {
+    const index = accounts.findIndex(
+      acc => acc.userName === currentUser.userName
+    );
+    accounts.splice(index, 1);
+    disconnect();
+  }
+  inputCloseUsername.value = inputClosePin.value = '';
+});
+
 /////////////////////////////////////////////////
 /////////////////////////////////////////////////
 // LECTURES
