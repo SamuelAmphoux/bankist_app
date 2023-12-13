@@ -35,6 +35,7 @@ const account4 = {
 
 const accounts = [account1, account2, account3, account4];
 let currentUser;
+let sortingStatus = 0;
 
 // Elements
 const labelWelcome = document.querySelector('.welcome');
@@ -81,7 +82,16 @@ const disconnect = () => {
 const displayMovements = function (movements) {
   containerMovements.innerHTML = '';
 
-  movements.forEach((value, i) => {
+  let movementsArr;
+  if (sortingStatus === 0) {
+    movementsArr = movements;
+  } else if (sortingStatus === 1) {
+    movementsArr = [...movements].sort((a, b) => a - b);
+  } else if (sortingStatus === 2) {
+    movementsArr = [...movements].sort((a, b) => b - a);
+  }
+
+  movementsArr.forEach((value, i) => {
     const type = value > 0 ? 'deposit' : 'withdrawal';
 
     const html = `
@@ -140,7 +150,7 @@ const displayInterest = function (user) {
     .filter(event => event > 0)
     .map(deposit => (deposit * user.interestRate) / 100)
     .reduce((acc, int) => (int >= 1 ? acc + int : acc), 0);
-  labelSumInterest.innerHTML = `${interest}€`;
+  labelSumInterest.innerHTML = `${parseInt(interest)}€`;
 };
 
 // Login logic
@@ -183,7 +193,21 @@ btnTransfer.addEventListener('click', function (e) {
   }
 });
 
-// Allows to user to delete their account
+// Allow user to request loan
+btnLoan.addEventListener('click', function (e) {
+  e.preventDefault();
+
+  const amount = Number(inputLoanAmount.value);
+
+  if (amount > 0 && currentUser.movements.some(mov => mov >= amount * 0.1)) {
+    currentUser.movements.push(amount);
+    bootDisplay(currentUser);
+    inputLoanAmount.value = '';
+    inputLoanAmount.blur();
+  }
+});
+
+// Allows the user to delete their account
 btnClose.addEventListener('click', function (e) {
   e.preventDefault();
   if (
@@ -197,6 +221,15 @@ btnClose.addEventListener('click', function (e) {
     disconnect();
   }
   inputCloseUsername.value = inputClosePin.value = '';
+});
+
+// Allows user to sort the movements of their account
+btnSort.addEventListener('click', function (e) {
+  e.preventDefault();
+
+  // Increments sortingStatus by 1 and then takes the remainder when divided by 3, effectively cycling between 0, 1, and 2
+  sortingStatus = (sortingStatus + 1) % 3;
+  displayMovements(currentUser.movements);
 });
 
 /////////////////////////////////////////////////
