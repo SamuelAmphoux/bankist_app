@@ -204,7 +204,7 @@ btnLogin.addEventListener('click', function (e) {
     containerApp.style.opacity = 0;
     inputLoginUsername.value = inputLoginPin.value = '';
     inputLoginPin.blur();
-    bootDisplay(currentUser);
+    const booting = () => bootDisplay(currentUser);
     setTimeout(booting, labelBalance.innerHTML === '' ? 0 : 1000);
   } else {
     disconnect();
@@ -221,13 +221,14 @@ btnTransfer.addEventListener('click', function (e) {
   );
   if (amount < 0 || receiverAcc === undefined)
     return alert('Transaction impossible');
-  console.log(receiverAcc?.owner !== currentUser.owner);
   if (
     amount <= currentUser.balance &&
     receiverAcc?.owner !== currentUser.owner
   ) {
     currentUser.movements.push(-amount);
+    currentUser.movementsDates.push(new Date().toISOString());
     receiverAcc.movements.push(amount);
+    receiverAcc.movementsDates.push(new Date().toISOString());
     bootDisplay(currentUser);
     inputTransferAmount.value = inputTransferTo.value = '';
     inputTransferAmount.blur();
@@ -242,6 +243,7 @@ btnLoan.addEventListener('click', function (e) {
 
   if (amount > 0 && currentUser.movements.some(mov => mov >= amount * 0.1)) {
     currentUser.movements.push(amount);
+    currentUser.movementsDates.push(new Date().toISOString());
     bootDisplay(currentUser);
     inputLoanAmount.value = '';
     inputLoanAmount.blur();
