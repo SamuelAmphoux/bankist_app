@@ -45,21 +45,21 @@ const account2 = {
   locale: 'en-US',
 };
 
-const account3 = {
-  owner: 'Steven Thomas Williams',
-  movements: [200, -200, 340, -300, -20, 50, 400, -460],
-  interestRate: 0.7,
-  pin: 3333,
-};
+// const account3 = {
+//   owner: 'Steven Thomas Williams',
+//   movements: [200, -200, 340, -300, -20, 50, 400, -460],
+//   interestRate: 0.7,
+//   pin: 3333,
+// };
 
-const account4 = {
-  owner: 'Sarah Smith',
-  movements: [430, 1000, 700, 50, 90],
-  interestRate: 1,
-  pin: 4444,
-};
+// const account4 = {
+//   owner: 'Sarah Smith',
+//   movements: [430, 1000, 700, 50, 90],
+//   interestRate: 1,
+//   pin: 4444,
+// };
 
-const accounts = [account1, account2, account3, account4];
+const accounts = [account1, account2];
 let currentUser;
 let sortingStatus = 0;
 
@@ -94,7 +94,7 @@ document.querySelectorAll('input').forEach(el => (el.value = ''));
 const bootDisplay = function (user) {
   labelWelcome.textContent = `Welcome back ${user.owner}`;
   displayMovements(user.movements);
-  displayBalance(user.movements);
+  displayBalance(user);
   displayInterest(user);
   containerApp.style.opacity = 1;
 };
@@ -126,7 +126,9 @@ const displayMovements = function (movements) {
       i + 1
     } : ${type} </div>
         <div class="movements__date">3 days ago</div>
-        <div class="movements__value">${value}€</div>
+        <div class="movements__value">${Number.parseFloat(value).toFixed(
+          2
+        )}€</div>
       </div>
     `;
     containerMovements.insertAdjacentHTML('afterbegin', html);
@@ -151,12 +153,12 @@ const createUsernames = function (namesArr) {
 createUsernames(accounts);
 
 // Add all deposits and withdrawals events to display balance
-const displayBalance = function (events) {
-  const total = events.reduce(function (acc, cur) {
+const displayBalance = function (user) {
+  const total = user.movements.reduce(function (acc, cur) {
     return acc + cur;
   }, 0);
-  currentUser.balance = total;
-  labelBalance.innerHTML = `${total}€`;
+  user.balance = total;
+  labelBalance.innerHTML = `${Number.parseFloat(total).toFixed(2)}€`;
 };
 
 // Takes all movements and calc ins outs and interests displayed at the bottom
@@ -165,18 +167,18 @@ const displayInterest = function (user) {
   const incomes = events
     .filter(event => event > 0)
     .reduce((acc, curr) => acc + curr, 0);
-  labelSumIn.innerHTML = `${incomes}€`;
+  labelSumIn.innerHTML = `${Number.parseFloat(incomes).toFixed(2)}€`;
 
   const expenses = events
     .filter(event => event < 0)
     .reduce((acc, curr) => acc + curr, 0);
-  labelSumOut.innerHTML = `${expenses}€`;
+  labelSumOut.innerHTML = `${Number.parseFloat(expenses).toFixed(2)}€`;
 
   const interest = events
     .filter(event => event > 0)
     .map(deposit => (deposit * user.interestRate) / 100)
     .reduce((acc, int) => (int >= 1 ? acc + int : acc), 0);
-  labelSumInterest.innerHTML = `${parseInt(interest)}€`;
+  labelSumInterest.innerHTML = `${Number.parseFloat(interest).toFixed(2)}€`;
 };
 
 // Login logic
@@ -185,11 +187,11 @@ btnLogin.addEventListener('click', function (e) {
   e.preventDefault();
   currentUser = accounts.find(acc => acc.userName === inputLoginUsername.value);
 
-  if (currentUser?.pin === parseInt(inputLoginPin.value)) {
+  if (currentUser?.pin === Number.parseInt(inputLoginPin.value)) {
     containerApp.style.opacity = 0;
     inputLoginUsername.value = inputLoginPin.value = '';
     inputLoginPin.blur();
-    const booting = () => bootDisplay(currentUser);
+    bootDisplay(currentUser);
     setTimeout(booting, labelBalance.innerHTML === '' ? 0 : 1000);
   } else {
     disconnect();
@@ -200,7 +202,7 @@ btnLogin.addEventListener('click', function (e) {
 // Allows logged in user to send money into another account
 btnTransfer.addEventListener('click', function (e) {
   e.preventDefault();
-  const amount = Number(inputTransferAmount.value);
+  const amount = +inputTransferAmount.value;
   const receiverAcc = accounts.find(
     acc => acc.userName === inputTransferTo.value
   );
@@ -223,7 +225,7 @@ btnTransfer.addEventListener('click', function (e) {
 btnLoan.addEventListener('click', function (e) {
   e.preventDefault();
 
-  const amount = Number(inputLoanAmount.value);
+  const amount = +inputLoanAmount.value;
 
   if (amount > 0 && currentUser.movements.some(mov => mov >= amount * 0.1)) {
     currentUser.movements.push(amount);
@@ -238,7 +240,7 @@ btnClose.addEventListener('click', function (e) {
   e.preventDefault();
   if (
     inputCloseUsername.value === currentUser.userName &&
-    Number(inputClosePin.value) === currentUser.pin
+    +inputClosePin.value === currentUser.pin
   ) {
     const index = accounts.findIndex(
       acc => acc.userName === currentUser.userName
@@ -271,3 +273,5 @@ const currencies = new Map([
 const movements = [200, 450, -400, 3000, -650, -130, 70, 1300];
 
 /////////////////////////////////////////////////
+
+bootDisplay(account1);
