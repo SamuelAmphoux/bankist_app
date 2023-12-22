@@ -91,9 +91,20 @@ const inputClosePin = document.querySelector('.form__input--pin');
 
 document.querySelectorAll('input').forEach(el => (el.value = ''));
 
+const now = new Date();
+const reformatDate = function (date) {
+  const day = date.getDate();
+  const month = date.toLocaleString('en-UK', { month: 'short' });
+  const year = date.getFullYear();
+  const hour = date.getHours();
+  const min = date.getMinutes().toString().padStart(2, '0');
+  return `${day} ${month} ${year}, ${hour}:${min}`;
+};
+labelDate.textContent = reformatDate(now);
+
 const bootDisplay = function (user) {
   labelWelcome.textContent = `Welcome back ${user.owner}`;
-  displayMovements(user.movements);
+  displayMovements(user);
   displayBalance(user);
   displayInterest(user);
   containerApp.style.opacity = 1;
@@ -105,30 +116,32 @@ const disconnect = () => {
 };
 
 // This function will display every movement from the given account
-const displayMovements = function (movements) {
+const displayMovements = function (user) {
   containerMovements.innerHTML = '';
 
-  let movementsArr;
-  if (sortingStatus === 0) {
-    movementsArr = movements;
-  } else if (sortingStatus === 1) {
-    movementsArr = [...movements].sort((a, b) => a - b);
+  let movementsArr = user.movements.map((value, i) => ({
+    value,
+    date: new Date(user.movementsDates[i]),
+  }));
+  if (sortingStatus === 1) {
+    movementsArr.sort((a, b) => a.value - b.value);
   } else if (sortingStatus === 2) {
-    movementsArr = [...movements].sort((a, b) => b - a);
+    movementsArr.sort((a, b) => b.value - a.value);
   }
 
-  movementsArr.forEach((value, i) => {
-    const type = value > 0 ? 'deposit' : 'withdrawal';
+  movementsArr.forEach((movement, i) => {
+    const type = movement.value > 0 ? 'deposit' : 'withdrawal';
+    const displayDate = reformatDate(new Date(movement.date));
 
     const html = `
       <div class="movements__row">
         <div class="movements__type movements__type--${type}">${
       i + 1
     } : ${type} </div>
-        <div class="movements__date">3 days ago</div>
-        <div class="movements__value">${Number.parseFloat(value).toFixed(
-          2
-        )}€</div>
+        <div class="movements__date">${displayDate}</div>
+        <div class="movements__value">${Number.parseFloat(
+          movement.value
+        ).toFixed(2)}€</div>
       </div>
     `;
     containerMovements.insertAdjacentHTML('afterbegin', html);
@@ -257,7 +270,7 @@ btnSort.addEventListener('click', function (e) {
 
   // Increments sortingStatus by 1 and then takes the remainder when divided by 3, effectively cycling between 0, 1, and 2
   sortingStatus = (sortingStatus + 1) % 3;
-  displayMovements(currentUser.movements);
+  displayMovements(currentUser);
 });
 
 /////////////////////////////////////////////////
@@ -274,4 +287,5 @@ const movements = [200, 450, -400, 3000, -650, -130, 70, 1300];
 
 /////////////////////////////////////////////////
 
+currentUser = account1;
 bootDisplay(account1);
