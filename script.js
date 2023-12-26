@@ -91,18 +91,6 @@ const inputClosePin = document.querySelector('.form__input--pin');
 
 document.querySelectorAll('input').forEach(el => (el.value = ''));
 
-const now = new Date();
-
-const reformatDate = function (date) {
-  const day = date.getDate();
-  const month = date.toLocaleString('en-UK', { month: 'short' });
-  const year = date.getFullYear();
-  const hour = date.getHours();
-  const min = date.getMinutes().toString().padStart(2, '0');
-  return `${day} ${month} ${year}, ${hour}:${min}`;
-};
-labelDate.textContent = reformatDate(now);
-
 const formatMovementDate = function (date) {
   const calcDaysPassed = (date1, date2) =>
     Math.round(Math.abs(date2 - date1) / (1000 * 60 * 60 * 24));
@@ -111,14 +99,22 @@ const formatMovementDate = function (date) {
   if (daysPassed === 0) return 'Today';
   if (daysPassed === 1) return 'Yesterday';
   if (daysPassed <= 7) return `${daysPassed} days ago`;
-  const day = `${date.getDate()}`.padStart(2, 0);
-  const month = `${date.getMonth() + 1}`.padStart(2, 0);
-  const year = date.getFullYear();
-  return `${day}/${month}/${year}`;
+  return new Intl.DateTimeFormat(currentUser.locale).format(date);
 };
 
 const bootDisplay = function (user) {
   labelWelcome.textContent = `Welcome back ${user.owner}`;
+  const now = new Date();
+  const options = {
+    hour: 'numeric',
+    minute: 'numeric',
+    day: 'numeric',
+    month: 'numeric',
+    year: 'numeric',
+  };
+  labelDate.textContent = new Intl.DateTimeFormat(user.locale, options).format(
+    now
+  );
   displayMovements(user);
   displayBalance(user);
   displayInterest(user);
