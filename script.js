@@ -17,9 +17,9 @@ const account1 = {
     '2020-01-28T09:15:04.904Z',
     '2020-04-01T10:17:24.185Z',
     '2020-05-08T14:11:59.604Z',
-    '2020-05-27T17:01:17.194Z',
-    '2020-07-11T23:36:17.929Z',
-    '2020-07-12T10:51:36.790Z',
+    '2023-12-20T17:01:17.194Z',
+    '2023-12-23T23:36:17.929Z',
+    '2023-12-25T10:51:36.790Z',
   ],
   currency: 'EUR',
   locale: 'pt-PT', // de-DE
@@ -92,6 +92,7 @@ const inputClosePin = document.querySelector('.form__input--pin');
 document.querySelectorAll('input').forEach(el => (el.value = ''));
 
 const now = new Date();
+
 const reformatDate = function (date) {
   const day = date.getDate();
   const month = date.toLocaleString('en-UK', { month: 'short' });
@@ -101,6 +102,20 @@ const reformatDate = function (date) {
   return `${day} ${month} ${year}, ${hour}:${min}`;
 };
 labelDate.textContent = reformatDate(now);
+
+const formatMovementDate = function (date) {
+  const calcDaysPassed = (date1, date2) =>
+    Math.round(Math.abs(date2 - date1) / (1000 * 60 * 60 * 24));
+
+  const daysPassed = calcDaysPassed(new Date(), date);
+  if (daysPassed === 0) return 'Today';
+  if (daysPassed === 1) return 'Yesterday';
+  if (daysPassed <= 7) return `${daysPassed} days ago`;
+  const day = `${date.getDate()}`.padStart(2, 0);
+  const month = `${date.getMonth() + 1}`.padStart(2, 0);
+  const year = date.getFullYear();
+  return `${day}/${month}/${year}`;
+};
 
 const bootDisplay = function (user) {
   labelWelcome.textContent = `Welcome back ${user.owner}`;
@@ -131,7 +146,7 @@ const displayMovements = function (user) {
 
   movementsArr.forEach((movement, i) => {
     const type = movement.value > 0 ? 'deposit' : 'withdrawal';
-    const displayDate = reformatDate(new Date(movement.date));
+    const displayDate = formatMovementDate(new Date(movement.date));
 
     const html = `
       <div class="movements__row">
