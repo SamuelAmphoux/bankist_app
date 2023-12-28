@@ -102,6 +102,13 @@ const formatMovementDate = function (date) {
   return new Intl.DateTimeFormat(currentUser.locale).format(date);
 };
 
+const formatNumbers = function (num) {
+  return new Intl.NumberFormat(currentUser.locale, {
+    style: 'currency',
+    currency: currentUser.currency,
+  }).format(num);
+};
+
 const bootDisplay = function (user) {
   labelWelcome.textContent = `Welcome back ${user.owner}`;
   const now = new Date();
@@ -143,6 +150,7 @@ const displayMovements = function (user) {
   movementsArr.forEach((movement, i) => {
     const type = movement.value > 0 ? 'deposit' : 'withdrawal';
     const displayDate = formatMovementDate(new Date(movement.date));
+    const formattedNumber = formatNumbers(movement.value);
 
     const html = `
       <div class="movements__row">
@@ -150,9 +158,7 @@ const displayMovements = function (user) {
       i + 1
     } : ${type} </div>
         <div class="movements__date">${displayDate}</div>
-        <div class="movements__value">${Number.parseFloat(
-          movement.value
-        ).toFixed(2)}€</div>
+        <div class="movements__value">${formattedNumber}</div>
       </div>
     `;
     containerMovements.insertAdjacentHTML('afterbegin', html);
@@ -182,7 +188,7 @@ const displayBalance = function (user) {
     return acc + cur;
   }, 0);
   user.balance = total;
-  labelBalance.innerHTML = `${Number.parseFloat(total).toFixed(2)}€`;
+  labelBalance.innerHTML = formatNumbers(total);
 };
 
 // Takes all movements and calc ins outs and interests displayed at the bottom
@@ -191,18 +197,18 @@ const displayInterest = function (user) {
   const incomes = events
     .filter(event => event > 0)
     .reduce((acc, curr) => acc + curr, 0);
-  labelSumIn.innerHTML = `${Number.parseFloat(incomes).toFixed(2)}€`;
+  labelSumIn.innerHTML = formatNumbers(incomes);
 
   const expenses = events
     .filter(event => event < 0)
     .reduce((acc, curr) => acc + curr, 0);
-  labelSumOut.innerHTML = `${Number.parseFloat(expenses).toFixed(2)}€`;
+  labelSumOut.innerHTML = formatNumbers(expenses);
 
   const interest = events
     .filter(event => event > 0)
     .map(deposit => (deposit * user.interestRate) / 100)
     .reduce((acc, int) => (int >= 1 ? acc + int : acc), 0);
-  labelSumInterest.innerHTML = `${Number.parseFloat(interest).toFixed(2)}€`;
+  labelSumInterest.innerHTML = formatNumbers(interest);
 };
 
 // Login logic
