@@ -60,7 +60,7 @@ const account2 = {
 // };
 
 const accounts = [account1, account2];
-let currentUser;
+let currentUser, timer;
 let sortingStatus = 0;
 
 // Elements
@@ -109,6 +109,23 @@ const formatNumbers = function (num) {
   }).format(num);
 };
 
+const startLogOutTimer = function () {
+  const tick = function () {
+    const min = String(Math.trunc(initialTime / 60)).padStart(2, 0);
+    const sec = String(initialTime % 60).padStart(2, 0);
+    labelTimer.textContent = `${min}:${sec}`;
+    if (initialTime === 0) {
+      disconnect();
+      clearInterval(logTimer);
+    }
+    initialTime--;
+  };
+  let initialTime = 300;
+  tick();
+  const logTimer = setInterval(tick, 1000);
+  return logTimer;
+};
+
 const bootDisplay = function (user) {
   labelWelcome.textContent = `Welcome back ${user.owner}`;
   const now = new Date();
@@ -122,6 +139,7 @@ const bootDisplay = function (user) {
   labelDate.textContent = new Intl.DateTimeFormat(user.locale, options).format(
     now
   );
+  timer = startLogOutTimer();
   displayMovements(user);
   displayBalance(user);
   displayInterest(user);
@@ -131,6 +149,7 @@ const bootDisplay = function (user) {
 const disconnect = () => {
   containerApp.style.opacity = 0;
   labelWelcome.textContent = 'Log in to get started';
+  clearInterval(timer);
 };
 
 // This function will display every movement from the given account
@@ -221,6 +240,7 @@ btnLogin.addEventListener('click', function (e) {
     containerApp.style.opacity = 0;
     inputLoginUsername.value = inputLoginPin.value = '';
     inputLoginPin.blur();
+    clearInterval(timer);
     const booting = () => bootDisplay(currentUser);
     setTimeout(booting, labelBalance.innerHTML === '' ? 0 : 1000);
   } else {
@@ -249,6 +269,8 @@ btnTransfer.addEventListener('click', function (e) {
     bootDisplay(currentUser);
     inputTransferAmount.value = inputTransferTo.value = '';
     inputTransferAmount.blur();
+    clearInterval(timer);
+    timer = startLogOutTimer();
   }
 });
 
@@ -261,9 +283,11 @@ btnLoan.addEventListener('click', function (e) {
   if (amount > 0 && currentUser.movements.some(mov => mov >= amount * 0.1)) {
     currentUser.movements.push(amount);
     currentUser.movementsDates.push(new Date().toISOString());
-    bootDisplay(currentUser);
+    displayMovements(currentUser);
     inputLoanAmount.value = '';
     inputLoanAmount.blur();
+    clearInterval(timer);
+    timer = startLogOutTimer();
   }
 });
 
@@ -306,5 +330,5 @@ const movements = [200, 450, -400, 3000, -650, -130, 70, 1300];
 
 /////////////////////////////////////////////////
 
-currentUser = account1;
-bootDisplay(account1);
+// currentUser = account1;
+// bootDisplay(account1);
